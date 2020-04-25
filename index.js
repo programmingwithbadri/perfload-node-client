@@ -5,15 +5,43 @@
 // - socket.io-client
 
 const os = require("os");
-const io = require('socket.io-client');
-let socket = io('http://127.0.0.1:8181');
+const io = require("socket.io-client");
+let socket = io("http://127.0.0.1:8181");
 
-socket.on('connect',()=>{
+socket.on("connect", () => {
   // console.log('I connected to the socket server... hooray!')
-});
+  // we need a way to identify this machine to whomever concerned
+  const nI = os.networkInterfaces();
+  // console.log(nI)
+  let macA;
+  // loop through all the nI for this machine and find a non-internal one
+  for (let key in nI) {
+    // FOR TESTING PURPOSES!!!
+    macA = Math.floor(Math.random() * 3) + 1;
+    break;
+    // FOR TESTING PURPOSES!!!
 
-performanceData().then((allPerformanceData) => {
-  console.log(allPerformanceData);
+    if (!nI[key][0].internal) {
+      if (nI[key][0].mac === "00:00:00:00:00:00") {
+        macA = Math.random().toString(36).substr(2, 15);
+      } else {
+        macA = nI[key][0].mac;
+      }
+      break;
+    }
+  }
+
+  // client auth with single key value
+  socket.emit("clientAuth", "5t78yuhgirekjaht32i3");
+
+  // start sending over data on interval
+  let perfDataInterval = setInterval(() => {
+    performanceData().then((allPerformanceData) => {
+      // console.log(allPerformanceData)
+      allPerformanceData.macA = macA;
+      socket.emit("perfData", allPerformanceData);
+    });
+  }, 1000);
 });
 
 // Get the node client's performance data
