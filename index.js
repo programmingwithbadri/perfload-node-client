@@ -5,6 +5,12 @@
 // - socket.io-client
 
 const os = require("os");
+const io = require('socket.io-client');
+let socket = io('http://127.0.0.1:8181');
+
+socket.on('connect',()=>{
+  // console.log('I connected to the socket server... hooray!')
+});
 
 performanceData().then((allPerformanceData) => {
   console.log(allPerformanceData);
